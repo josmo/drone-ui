@@ -1,7 +1,7 @@
 import { branch } from 'baobab-react/higher-order';
 import PageContent from '../../components/layout/content';
 import React from 'react';
-import { events, GET_REPO_SECRETS, DEL_REPO_SECRET, POST_REPO_SECRET } from '../../actions/events';
+import { events, GET_REPO_SECRETS, DEL_REPO_SECRET, POST_REPO_SECRET, GET_ORG_SECRETS } from '../../actions/events';
 import { Textfield, FABButton, Icon, Switch } from 'react-mdl';
 
 import './index.less';
@@ -22,13 +22,14 @@ class Content extends React.Component {
   componentDidMount() {
     const { owner, name } = this.props.params;
     events.emit(GET_REPO_SECRETS, { owner, name });
+    events.emit(GET_ORG_SECRETS, { owner });
   }
 
   render() {
 
     const { owner, name } = this.props.params;
-    const { secrets } = this.props;
-    if (!secrets) {
+    const { secrets, org_secrets } = this.props;
+    if (!secrets || !org_secrets) {
       return (
         <div>Loading...</div>
       );
@@ -100,6 +101,33 @@ class Content extends React.Component {
         </FABButton>
         <hr/>
 
+        Org Secrets for {owner}
+        <hr/>
+        {
+          org_secrets
+            .map((secret, index) => {
+              return (
+
+                <div key={index}>
+                  <Textfield
+                    label="Secret Name"
+                    floatingLabel
+                    style={{ width: '300px' }}
+                    value={secret.name}
+                    disabled={true}
+                  />
+                  <Switch id="push" disabled={true} checked={ secret.event.indexOf('push') !== -1}>Push</Switch>
+                  <Switch id="tag" disabled={true} checked={ secret.event.indexOf('tag') !== -1}>Tag</Switch>
+                  <Switch id="deployment" disabled={true}
+                          checked={ secret.event.indexOf('deployment') !== -1}>Deployment</Switch>
+                  <Switch id="pull_request" disabled={true} checked={ secret.event.indexOf('pull_request') !== -1}>Pull
+                    request</Switch>
+                  <hr/>
+                </div>
+              );
+            })
+        }
+
       </PageContent>
     );
   }
@@ -151,6 +179,7 @@ class Content extends React.Component {
 export default branch((props) => {
   const { owner, name } = props.params;
   return {
-    secrets: ['secrets', owner, name]
+    secrets: ['secrets', owner, name],
+    org_secrets: ['org_secrets', owner]
   };
 }, Content);
