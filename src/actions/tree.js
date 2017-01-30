@@ -25,9 +25,13 @@ export const tree = new Baobab({
 
   secrets: {},
 
-  // the or secrets branch of the tree maintains the current secrets for the org
+  // the org secrets branch of the tree maintains the current secrets for the org
 
   org_secrets: {},
+
+  // the globacl secrets branch of the tree maintains the current secrets that are global
+
+  global_secrets: {},
 
   // the build branch of the tree maintains an unfiltered index of builds nodes 
   // organized by repository owner, name, and build number. For example:

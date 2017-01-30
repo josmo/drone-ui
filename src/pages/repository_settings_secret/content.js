@@ -2,7 +2,7 @@ import { branch } from 'baobab-react/higher-order';
 import PageContent from '../../components/layout/content';
 import React from 'react';
 
-import { events, GET_REPO_SECRETS, DEL_REPO_SECRET, POST_REPO_SECRET, GET_ORG_SECRETS } from '../../actions/events';
+import { events, GET_REPO_SECRETS, DEL_REPO_SECRET, POST_REPO_SECRET, GET_ORG_SECRETS, GET_GLOBAL_SECRETS } from '../../actions/events';
 import { Textfield, FABButton, Icon, Switch, Grid, Cell, Checkbox } from 'react-mdl';
 
 import './index.less';
@@ -40,12 +40,13 @@ class Content extends React.Component {
     const { owner, name } = this.props.params;
     events.emit(GET_REPO_SECRETS, { owner, name });
     events.emit(GET_ORG_SECRETS, { owner });
+    events.emit(GET_GLOBAL_SECRETS);
   }
 
   render() {
     const { owner, name } = this.props.params;
-    const { secrets, org_secrets } = this.props;
-    if (!secrets || !org_secrets) {
+    const { secrets, org_secrets, global_secrets } = this.props;
+    if (!secrets || !org_secrets || !global_secrets) {
       return (
         <div>Loading...</div>
       );
@@ -185,6 +186,43 @@ class Content extends React.Component {
               );
             })
         }
+        Global Secrets
+        {
+          global_secrets
+            .map((secret, index) => {
+              return (
+
+                <div key={index}>
+                  <Textfield
+                    label="Secret Name"
+                    floatingLabel
+                    style={{ width: '300px' }}
+                    value={secret.name}
+                    disabled={true}
+                  />
+                  <div style={{ width: '100%', margin: 'auto' }}>
+                    <Grid className="secret-properties">
+                      <Cell col={6}>
+                        {
+                          eventTypes.map(eventType => {
+                            return (
+                              <Switch key={eventType.value} id={eventType.value} disabled={true} checked={ secret.event.indexOf(eventType.value) !== -1}>{eventType.label}</Switch>
+                            );
+                          })
+                        }
+                      </Cell>
+                      <Cell col={6}>
+                        <Checkbox label="Skip Verify" disabled={true} checked={ secret.skip_verify }/>
+                        <Checkbox label="Conceal" disabled={true} checked={ secret.conceal}/>
+                      </Cell>
+                    </Grid>
+                  </div>
+
+                  <hr/>
+                </div>
+              );
+            })
+        }
 
       </PageContent>
     );
@@ -249,6 +287,7 @@ export default branch((props) => {
   const { owner, name } = props.params;
   return {
     secrets: ['secrets', owner, name],
-    org_secrets: ['org_secrets', owner]
+    org_secrets: ['org_secrets', owner],
+    global_secrets: ['global_secrets']
   };
 }, Content);

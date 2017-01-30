@@ -36,6 +36,7 @@ export const GET_REPO_SECRETS = 'GET_REPO_SECRETS';
 export const POST_REPO_SECRET = 'POST_REPO_SECRET';
 export const DEL_REPO_SECRET = 'DEL_REPO_SECRET';
 export const GET_ORG_SECRETS = 'GET_ORG_SECRETS';
+export const GET_GLOBAL_SECRETS = 'GET_GLOBAL_SECRETS';
 
 let token = function() {
   var meta = document.querySelector('meta[name=csrf-token]');
@@ -464,6 +465,21 @@ events.on(GET_ORG_SECRETS, function(event) {
         tree.set(['org_secrets', owner], []);
       } else {
         tree.set(['org_secrets', owner], secrets);
+      }
+    });
+});
+
+events.on(GET_ORG_SECRETS, function() {
+  Request.get(`/api/global/secrets`)
+    .end((err, response) => {
+      if (err != null) {
+        console.error(err);
+      }
+      let secrets = JSON.parse(response.text);
+      if (secrets === null){
+        tree.set(['global_secrets'], []);
+      } else {
+        tree.set(['global_secrets'], secrets);
       }
     });
 });
